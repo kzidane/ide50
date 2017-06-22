@@ -4,25 +4,43 @@
 #
 # To run, execute "update50" at the command line.
 
+# log output
+LOG=/home/ubuntu/lib/ide50.log
+exec &> >(sudo tee -a $LOG)
+
+# run newer update50 (if any)
+curl -sL https://raw.githubusercontent.com/kzidane/ide50/master/files/usr/bin/update50 -o /tmp/update50
+if diff -q /usr/bin/update50 /tmp/update50; then
+    chmod a+x /tmp/ubuntu50
+    /tmp/update50
+    exit $?
+fi
 
 echo -e "\nDO NOT CLOSE THIS WINDOW OR PUT YOUR COMPUTER TO SLEEP <3\n"
 sleep 2
 
-LOG=/home/ubuntu/lib/ide50.log
+echo "Adding apt repos..."
+sudo add-apt-repository -y ppa:cs50/ppa
+sudo apt-get update
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
 
-echo -e "\n\n\nUpdate50 - $(date -R)" | sudo tee -a $LOG
-
+echo -e "\n\n\nUpdate50 - $(date -R)"
 echo 'Updating sources...'
+
 # try to fix dpkg before updating
-sudo dpkg --configure -a 2>&1 | sudo tee -a $LOG >/dev/null
+sudo dpkg --configure -a
 
 # if requested, flush the apt-get Packages file cache
 if [ "$1" == "-f" ]; then
-    echo "CLEARING PACKAGE CACHE" | sudo tee -a $LOG
-    sudo rm -rf /var/lib/apt/lists/* | sudo tee -a $LOG >/dev/null
+    echo "CLEARING PACKAGE CACHE"
+    sudo rm -rf /var/lib/apt/lists/*
 fi
 
-sudo apt-get update 2>&1 | sudo tee -a $LOG
+# enable recommending third-party packages by temporarily disabling cs50 apt repo
+# sudo mv /etc/apt/sources.list.d/{cs50.list,cs50.list.disabled}
+# sed -i 's%\(deb http://mirror.cs50.net/ide50/2015/dists/trusty/main/binary-amd64/ /\)%#\1%' /etc/apt/sources.list
+
+sudo apt-get update
 if [ $? -ne 0 ]
 then
     echo "Something went wrong! The output has been logged in $LOG"
@@ -30,7 +48,7 @@ then
 fi
 
 echo 'Reinstalling ide package...'
-sudo -E apt-get -o Dpkg::Options::="--force-confnew" -o Dpkg::Options::="--force-overwrite" install --reinstall --yes --force-yes --assume-yes ide50 2>&1 | sudo tee -a $LOG
+sudo -E apt-get -o Dpkg::Options::="--force-confnew" -o Dpkg::Options::="--force-overwrite" install --reinstall --yes --force-yes --assume-yes ide50
 if [ $? -ne 0 ]
 then
     echo "Something went wrong! The output has been logged in $LOG"

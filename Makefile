@@ -55,17 +55,18 @@ deb: clean Makefile
 		clang-3.6, \
 		dnsutils, \
 		dos2unix, \
+		git-lfs, \
 		gdbserver, \
 		help50 (>= 1.2.2), \
 		inotify-tools, \
-		libcs50 (>= 7.2.1), \
-		libcs50-java (>= 2.0.0), \
+		libcs50 (= 8.0.3), \
+		libcs50-java (= 2.0.2), \
 		libphp-phpmailer, \
-		library50-php, \
 		manpages-dev, \
 		ngrok-client, \
 		nodejs, \
 		openjdk-7-jdk, \
+		php-cs50 (= 6.0.0) \
 		php5-cgi, \
 		php5-curl, \
 		php5-sqlite, \
